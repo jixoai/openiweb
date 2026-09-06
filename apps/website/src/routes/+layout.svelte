@@ -4,7 +4,11 @@
   字标）；[scrollbar-law] scrollbar-measure 探针在根布局仅 import 一次，
   发布实测的每 OS 滚动条宽度（--jx-scrollbar-thin/auto）供主题的
   both-edges padding 补偿消费；[base-path] 站内链接经 $app/paths 的 base
-  解析，严禁硬编码前缀。
+  解析，严禁硬编码前缀；[site-i18n] (2026-09-06) locale 由 route id 派生
+  （/zh → zh，其余 → en），导航文案/副标题/footer 取自 site-i18n 字典，
+  language-switcher（pair）与 ThemeToggle 并列接入 terminal-header 右翼，
+  切换链接携带当前 hash——锚点/路径在 locale 间保持；客户端路由后的
+  <html lang> 同步由 $effect 承载（预渲染产物由 hooks.server 落值）。
 
   Original request (2026-09-06, Asia/Shanghai): 新增 ./openiweb 官网站点。
 -->
@@ -13,6 +17,7 @@
   // 滚动条法则（skill law）：探针只在此 import 一次。
   import "$lib/scrollbar-measure";
   import { base } from "$app/paths";
+  import { page } from "$app/state";
   import WebsiteScaffold from "$lib/ui/website-scaffold/website-scaffold.svelte";
   import TerminalFooter from "$lib/ui/terminal-footer/terminal-footer.svelte";
   import TerminalFooterColumn from "$lib/ui/terminal-footer/terminal-footer-column.svelte";
@@ -20,19 +25,43 @@
   import NavigationMenu from "$lib/ui/navigation-menu/navigation-menu.svelte";
   import NavigationMenuLink from "$lib/ui/navigation-menu/navigation-menu-link.svelte";
   import ThemeToggle from "$lib/ui/theme-toggle/theme-toggle.svelte";
+  import LanguageSwitcher from "$lib/ui/language-switcher/language-switcher.svelte";
   import { cn } from "$lib/utils";
-  import { GITHUB_URL, README_ZH_URL, SITE_DOMAIN, SITE_SUBTITLE, SPECS_URL } from "$lib/site";
+  import { GITHUB_URL, SITE_DOMAIN, SPECS_URL } from "$lib/site";
+  import { localePath, siteCopy, type LocaleCode } from "$lib/site-i18n";
   import type { Snippet } from "svelte";
 
   let { children }: { children: Snippet } = $props();
 
-  // 单页锚点导航：站内路由链接（Overview）走 base；页内锚点用 #fragment。
-  const nav = [
-    { href: `${base}/`, label: "Overview", current: true },
-    { href: "#quick-start", label: "Quick start", current: false },
-    { href: "#security", label: "Security", current: false },
-    { href: GITHUB_URL, label: "GitHub", current: false, external: true },
-  ];
+  // locale 派生自 route id（不含 base 前缀，预渲染期同样可用）。
+  const locale = $derived<LocaleCode>(page.route.id?.startsWith("/zh") ? "zh" : "en");
+  const copy = $derived(siteCopy[locale]);
+
+  // 客户端路由（en↔zh）后同步 <html lang>；SSR 值已由 hooks.server 落盘。
+  $effect(() => {
+    document.documentElement.lang = copy.htmlLang;
+  });
+
+  // locale 根路径（base 感知，一律目录形态带尾斜杠——哑静态服务器下
+  // /openiweb（无斜杠）会 404；en 在 base 为空时落到 "/"）。
+  const localeHref = (target: LocaleCode): string =>
+    target === "en" ? `${base}/` : `${base}${localePath.zh}`;
+
+  // 单页锚点导航：站内路由链接（总览）走 base；页内锚点用 #fragment。
+  // 两个 locale 共享同一组锚点 id（#quick-start / #security）。
+  const nav = $derived([
+    { href: localeHref(locale), label: copy.nav.overview, current: true },
+    { href: "#quick-start", label: copy.nav.quickStart, current: false },
+    { href: "#security", label: copy.nav.security, current: false },
+    { href: GITHUB_URL, label: copy.nav.github, current: false, external: true },
+  ]);
+
+  // 语言切换对：href 携带当前 hash，锚点跨 locale 保持（SSR 预渲染时
+  // hash 为空串，行为退化为跳到目标页顶部，无 JS 也可用）。
+  const switcherLocales = $derived([
+    { code: "en", label: "EN", href: `${localeHref("en")}${page.url.hash}` },
+    { code: "zh", label: "中文", href: `${localeHref("zh")}${page.url.hash}` },
+  ]);
 
   // pill 涂装：bezel 语言叠加在 navigation-menu 家族底色上（同 registry
   // www 的组合法）。
@@ -52,11 +81,12 @@
     <TerminalHeader
       brand="iweb"
       domain={SITE_DOMAIN}
-      subtitle={SITE_SUBTITLE}
-      homeHref={base || "/"}
+      subtitle={copy.headerSubtitle}
+      homeHref={localeHref(locale)}
+      switcherFrame={false}
       bind:open={drawerOpen}
     >
-      <NavigationMenu label="Primary" class="flex-nowrap items-center gap-0">
+      <NavigationMenu label={copy.nav.landmark} class="flex-nowrap items-center gap-0">
         {#each nav as item (item.label)}
           <NavigationMenuLink
             href={item.href}
@@ -96,11 +126,21 @@
         </svg>
       {/snippet}
       {#snippet switcher()}
-        <!-- compact 控件自带框内边距，按 terminal-header 的 frame 法则关掉外框 -->
-        <ThemeToggle variant="compact" />
+        <!-- bezel 控件簇：compact ThemeToggle 与 language-switcher pair 共用
+             同一 bezel 配方（各自带 1px currentColor 边框），按 terminal-header
+             的 frame 法则关掉外框（switcherFrame={false}），避免 framed-in-frame -->
+        <div class="flex items-center gap-1.5">
+          <ThemeToggle variant="compact" />
+          <LanguageSwitcher
+            variant="pair"
+            current={locale}
+            locales={switcherLocales}
+            ariaLabel={copy.switcherAria}
+          />
+        </div>
       {/snippet}
       {#snippet drawer()}
-        <nav class="flex flex-col border-t border-terminal-foreground/10 py-2 text-xs" aria-label="Primary">
+        <nav class="flex flex-col border-t border-terminal-foreground/10 py-2 text-xs" aria-label={copy.nav.landmark}>
           {#each nav as item (item.label)}
             <a
               href={item.href}
@@ -127,11 +167,11 @@
 
   {#snippet footer()}
     <TerminalFooter ghost="IWEB" copyright={`© ${new Date().getFullYear()} iweb contributors`}>
-      <TerminalFooterColumn title="project">
+      <TerminalFooterColumn title={copy.footer.projectTitle}>
         <a href={GITHUB_URL} target="_blank" rel="noreferrer">GitHub</a>
-        <a href={README_ZH_URL} target="_blank" rel="noreferrer">中文文档</a>
+        <a href={copy.footer.docsUrl} target="_blank" rel="noreferrer">{copy.footer.docsLabel}</a>
       </TerminalFooterColumn>
-      <TerminalFooterColumn title="specs">
+      <TerminalFooterColumn title={copy.footer.specsTitle}>
         <a href={SPECS_URL} target="_blank" rel="noreferrer">openspec/specs</a>
       </TerminalFooterColumn>
     </TerminalFooter>

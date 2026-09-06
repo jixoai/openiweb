@@ -30,6 +30,16 @@ ui.jixoai.com registry（jixoai-ui 0.3.0）。
 - `llms-txt` 项的 target 是项目相对路径 `vite-plugins/llms-txt.mjs`，但
   shadcn 在 svelte-kit 框架下把它放进了 `src/vite-plugins/`；已移回
   `vite-plugins/` 以对齐 lock 记录与 skill 文档的路径契约。
+- **language-switcher**（2026-09-06 i18n change 单项 add）：一次成功落盘
+  于 `src/lib/ui/language-switcher/`（本项未触发 `src/@lib` 字面目录陷阱，
+  registry paths 直接是 alias 形态）；utils/icons/defaults 三个依赖闭包
+  文件已在盘且哈希一致，CLI 识别为 identical 跳过；lock 新增 3 文件
+  哈希全 MATCH。
+- **已知偏差（pre-existing，非本次引入）**：`jixoai-ui.lock` 里
+  `jixoai-theme` 的 `jixoai.css` 哈希与磁盘不符——CLI 记录的是 registry
+  原始表哈希，而 wrapper 落盘后重放了 `--brand-hue: 253`（磁盘文件与
+  git HEAD 一致，本次 add 前后字节不变）。属 wrapper 记账口径问题，
+  待上游修；不影响 upgrade 语义之外的使用。
 
 ## app.css 补充映射（tasks 2.4 的核验结果）
 
@@ -39,7 +49,56 @@ initial`（封杀 Tailwind 默认 rounded 刻度）外全部由 registry 表自�
 `src/app.css` 只补 radius 封杀 + `@layer base` 规则 + 站点表面
 （data-table / readonly-code）。
 
-## 与 skill 的已记录分歧
+## 站点 i18n / 中文镜像（2026-09-06）
+
+- **决策**：`/` 保持英文（URL 稳定），`/zh/` 为中文镜像；zh 文案唯一信源
+  是仓库 `README-zh.md`（`src/lib/site-i18n.ts` 的 `SiteCopy` 类型把 en/zh
+  两字典锁成同构，形状漂移编译期报错）。en 文案逐字从原首页收敛进字典，
+  未改一字。
+- **共享骨架**：`src/lib/home-page.svelte` 承载整页叙事，`src/routes/
+  +page.svelte` 与 `src/routes/zh/+page.svelte` 只是 locale 装配层。
+- **per-locale `<html lang>`**：SvelteKit（2.70.3）没有 lang 模板占位符，
+  采用社区标准形态——`src/app.html` 写 `lang="%lang%"`，`src/hooks.server.ts`
+  的 `transformPageChunk` 按 route id（`/zh*` → zh）替换；adapter-static
+  预渲染在构建期走同一管路，产物直接落正确值。客户端路由后的 lang 同步
+  由根布局 `$effect` 承载。
+  **坑**：`String.replace` 只替换首个匹配——app.html 头部注释里若出现
+  字面 `%lang%`，会抢先吃掉替换（实测踩中）；hooks 已改为
+  `replaceAll('lang="%lang%"', …)` 属性锚定形态。
+- **`/zh/` 目录形态**：根布局 `trailingSlash: "never"` 会把 /zh 预渲染成
+  平铺 `zh.html`（哑静态服务器 `/zh/` 404）；`src/routes/zh/+page.ts` 以
+  路由级 `trailingSlash: "always"` 覆盖，产物为 `zh/index.html`，
+  `/zh/` 直接 200（python http.server 实测）。站内 locale 链接一律目录
+  形态带尾斜杠（`${base}/`、`${base}/zh/`）。
+- **hreflang**：两页均发 en / zh / x-default（x-default 指 en 根）三件套，
+  绝对 URL 由 vite `define` 注入的 `__SITE_URL__`（与 llms-txt 的
+  `siteUrl` 同源推导：`SITE_URL` > 按 `SITE_BASE` 推导），子路径/自定义域
+  两种服务形态零代码改动（两种形态均构建验证通过）。
+- **language-switcher**（registry `add`，单项）：`variant="pair"` 与
+  compact `ThemeToggle` 并列接入 terminal-header 右翼 `switcher` snippet。
+  两者共用同一 bezel 配方（各自 1px currentColor 边框），故传
+  `switcherFrame={false}` 关掉 header 外框——顺手修复了原布局"注释声称
+  关框但没传 prop"的 framed-in-frame 遗留问题。切换链接携带当前
+  `page.url.hash`（`$app/state` 响应式），锚点/路径跨 locale 保持；SSR
+  预渲染时 hash 为空串，无 JS 退化为跳页顶。locale 派生自 `page.route.id`
+  （不含 base，预渲染期同样可用）。
+- **llms 双 locale**：`vite.config.ts` 给 `llmsTxt()` 配
+  `locale: { segments: ["zh"], default: "en" }`——产物为根 `llms.txt`
+  （en + "Other languages" 节链 `/zh/llms.txt`）、`zh/llms.txt`、
+  `index.md`、`zh/index.md`、`llms-full.txt`（仅默认 locale，混语言检索
+  反而有害——插件既定设计）。**上游缺口（记录不本地补丁）**：插件只有
+  单一 title/summary 配置，`zh/llms.txt` 的索引头仍是英文标题+摘要
+  （正文条目是中文）；与 skill 记录的 "flat .html routes" 缺口同类。
+- **字节一致性**：AI 导出层（llms.txt / llms-full.txt / index.md /
+  zh/llms.txt / zh/index.md）双构建 sha256 全等；页面 HTML 除 vite chunk
+  hash 文件名与每构建随机的 `__sveltekit_*` 引导 token 外内容全等
+  （vite 8 产物不可复现是 skill 已记录的上游事实，字节恒等法则只约束
+  AI 导出层）。
+- **check-static 扩展**：双页存在性 + `<html lang>` 期望值 + hreflang
+  三件套 + base 前缀 + 本地目标解析，双 llms 版绝对链接 + 根版链接
+  zh 版的交叉证明。
+
+## 与 skill 的已记录分歧（历史）
 
 - **theme-color = `#008bff`**（proposal 裁定：favicon/theme-color 携带项目
   图标色），而非 skill tech-stack 建议的暗色画布 `#000000`。favicon /

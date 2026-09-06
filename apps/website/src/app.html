@@ -6,11 +6,13 @@
   不同，见包内 NOTES.md）；
   [no-flash] 首绘前同步引导主题（localStorage theme + prefers-color-scheme
   → html.dark + colorScheme），并打上 html.js 存活标记（jixoai 表面族的
-  no-JS 回退分支仍以它为门）。
+  no-JS 回退分支仍以它为门）；
+  [site-i18n] (2026-09-06) lang 为占位符属性，由 src/hooks.server.ts
+  按 route（/zh → zh，其余 → en）在解析期替换（预渲染产物直接落正确值）。
 
   Original request (2026-09-06, Asia/Shanghai): 新增 ./openiweb 官网站点。
 -->
-<html lang="en">
+<html lang="%lang%">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />

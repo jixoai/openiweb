@@ -1,7 +1,11 @@
 // Orthogonal intents (2026-09-06): [official-site] vite 构建入口；
 // [design-language] @tailwindcss/vite 消费 jixoai token 表（CSS-first）；
 // [ai-export] llmsTxt() 是唯一的 llms.txt 生成点（普通 vite build 站点用
-// 插件形态，严禁再接编排式 generateLlmsTxt 造成双生成）。
+// 插件形态，严禁再接编排式 generateLlmsTxt 造成双生成）；
+// [site-i18n] (2026-09-06) locale.segments 让 AI 导出覆盖双 locale
+// （zh/ 镜像获得自己的 zh/llms.txt 与 zh/index.md，根 llms.txt 追加
+// "Other languages" 节），并把与 siteUrl 同源推导的绝对 origin 以
+// __SITE_URL__ define 注入（hreflang 用），两种服务形态零改动。
 //
 // Original request (2026-09-06, Asia/Shanghai): 新增 ./openiweb 官网站点。
 // baseUrl 契约：SITE_URL > 按 SITE_BASE 推导（子路径模式 →
@@ -21,9 +25,11 @@ function resolveBase(raw: string | undefined): string {
 
 const base = resolveBase(process.env.SITE_BASE);
 const siteUrl =
-	process.env.SITE_URL ?? `https://jixoai.github.io${base}`;
+	process.env.SITE_URL ?? (process.env.SITE_CNAME === '1' ? 'https://openiweb.jixoai.com' : `https://jixoai.github.io${base}`);
 
 export default defineConfig({
+	// hreflang 的绝对 URL 源（src/env.d.ts 有 ambient 声明）。
+	define: { __SITE_URL__: JSON.stringify(siteUrl) },
 	plugins: [
 		sveltekit(),
 		tailwindcss(),
@@ -33,6 +39,8 @@ export default defineConfig({
 			title: "iweb",
 			summary:
 				"iweb is an open-source personal application node for people who don't want to learn containers, databases, or network operations: hand your MCP endpoint and one owner key to an AI coding agent, and it deploys and operates applications on your own node.",
+			// 根（en）为默认 locale；/zh/ 镜像独立成段（zh/llms.txt）。
+			locale: { segments: ["zh"], default: "en" },
 		}),
 	],
 });
