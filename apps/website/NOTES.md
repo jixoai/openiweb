@@ -176,12 +176,38 @@ initial`（封杀 Tailwind 默认 rounded 刻度）外全部由 registry 表自�
 - base 感知靠烘焙：`hooks.server.ts` 与 svelte.config.js 的 `resolveBase`
   同律解析 SITE_BASE（CNAME 模式即 SITE_BASE 缺省 → 根路径），锚定引号替换
   进协商脚本；双模式 dist 实测烘焙值为 `""` 与 `"/openiweb"`。
-- 切换器持久化在根布局以委托 click 挂在 bezel 包裹层（读被点锚点的
-  `hreflang`）——registry `language-switcher` 件与其 lock 逐字节不变；显式
-  点击此后永远压过检测。
+- 切换器持久化已移入 registry `language-switcher` 件本体
+  （consumer-feedback-fixes P0-2，2026-09-06 upgrade 消费）：组件点击
+  自写 localStorage `lang`，根布局的委托 click hack（bezel 包裹层读
+  `hreflang`）已删除；显式点击此后永远压过检测。
 - 验证（playwright-core 1.63 + 本机缓存 Chromium）：三站矩阵 × 双服务模式，
   zh-CN → `/zh/`（hash 保留）、zh-Hans-CN 主子标签命中、en-US 留、en-US
   优先列表留、pt-BR 优先列表走到 `/zh/`、stored zh 生效、stored en 在
   `/zh/` 不跳回、zh-CN 在 `/zh/` 不动（防环律）——每模式 16 例 + 真点击
   切换持久化全绿；双模式 build + check-static PASS；dev 抽查（opentray，
   同款 hook 管线）确认 dev 下占位符同样解析。
+
+## 上游 consumer-feedback-fixes 消费（2026-09-06）
+
+- `npx jixoai-ui upgrade`（registry ui.jixoai.com）：updated 8 /
+  unchanged 56 / skipped 3（CLI 已锁未装防呆）。更新件与 opentray
+  同批：`jixoai-theme`、`scrollbar-measure`、`theme-toggle`、
+  `hero-section`、`press-button`、`defaults`、`context-plugin`、
+  `language-switcher`。lock 23 → 23；lock↔磁盘哈希核对 63/64 精确
+  （唯一偏差 `jixoai.css`——lock 记 pre-hue 规范哈希，盘上带 hue 253，
+  upgrade 重涂后实测 `--brand-hue: 253`）。
+- Hack 移除：`+layout.svelte` 的 `persistLocale` 事件委托（bezel
+  包裹层 `onclick` 读 `a[hreflang]` 写 localStorage）删除——升级后的
+  registry 切换器自带持久化契约（P0-2：click → `localStorage.lang`，
+  try/catch 静默、纯锚点导航不 preventDefault）。头部注释的
+  [locale-persist] 意图同步改写为组件内契约。
+- `theme-toggle` 新增可选 `labels` prop（full 变体文案本地化）；本站
+  用 `variant="compact"`（纯图标），无需传。
+- `jixoai.css` 注释语境修正已消费（--brand-hue 注释现明确消费者用
+  静态 hue；wall-clock 轮换是 ui.jixoai.com 站点本地行为）。
+- 验证：bun install（根，无变化）→ 双模式 build PASS（缺省 subpath +
+  SITE_CNAME=1 SITE_CNAME_DOMAIN=openiweb.jixoai.com
+  SITE_URL=https://openiweb.jixoai.com，dist/CNAME 写入）+
+  check-static PASS（CNAME 模式）；playwright 无头抽查 dev（13226）：
+  点中文 → `lang=zh` 且落 `/zh/`、刷新留 zh（`<html lang="zh">`）、
+  点 EN → `lang=en` 且刷新留 en——6/6 绿。

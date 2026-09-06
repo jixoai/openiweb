@@ -9,9 +9,9 @@
   language-switcher（pair）与 ThemeToggle 并列接入 terminal-header 右翼，
   切换链接携带当前 hash——锚点/路径在 locale 间保持；客户端路由后的
   <html lang> 同步由 $effect 承载（预渲染产物由 hooks.server 落值）。
-  [locale-persist] (2026-09-06, locale-negotiation change) 显式切换写入
-  localStorage lang——app.html 首帧协商读它为最高优先级（显式选择永远
-  压过浏览器语言检测）。
+  [locale-persist] 持久化已内置于 registry language-switcher
+  （consumer-feedback-fixes P0-2，2026-09-06 upgrade 消费）：组件点击
+  自写 localStorage lang——app.html 首帧协商读它为最高优先级。
 
   Original request (2026-09-06, Asia/Shanghai): 新增 ./openiweb 官网站点。
 -->
@@ -65,19 +65,6 @@
     { code: "en", label: "EN", href: `${localeHref("en")}${page.url.hash}` },
     { code: "zh", label: "中文", href: `${localeHref("zh")}${page.url.hash}` },
   ]);
-
-  // app.html 协商的持久化（委托挂在 bezel 包裹层——registry 切换器渲染
-  // 的是带 hreflang 的普通锚点，从锚点读目标 locale，registry 件零改动）。
-  const persistLocale = (event: MouseEvent) => {
-    const code = (event.target as HTMLElement | null)?.closest("a[hreflang]")?.getAttribute("hreflang");
-    if (code === "en" || code === "zh") {
-      try {
-        window.localStorage.setItem("lang", code);
-      } catch {
-        /* storage 不可用——导航本身照常进行 */
-      }
-    }
-  };
 
   // pill 涂装：bezel 语言叠加在 navigation-menu 家族底色上（同 registry
   // www 的组合法）。
@@ -145,7 +132,7 @@
         <!-- bezel 控件簇：compact ThemeToggle 与 language-switcher pair 共用
              同一 bezel 配方（各自带 1px currentColor 边框），按 terminal-header
              的 frame 法则关掉外框（switcherFrame={false}），避免 framed-in-frame -->
-        <div class="flex items-center gap-1.5" onclick={persistLocale}>
+        <div class="flex items-center gap-1.5">
           <ThemeToggle variant="compact" />
           <LanguageSwitcher
             variant="pair"
