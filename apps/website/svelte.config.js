@@ -1,7 +1,8 @@
-// Orthogonal intents (2026-09-06): [official-site] iweb 官网静态构建；
+// Orthogonal intents (2026-09-06): [official-site] OpenIWeb 官网静态构建；
 // [base-path] SITE_BASE → kit.paths.base，一份代码同时支持 GitHub Pages
 // 子路径（jixoai.github.io/openiweb）与自定义域名根路径两种服务形态；
 // [static-output] adapter-static 全量预渲染，无服务端运行时。
+// [rename-openiweb] (2026-09-07, Owner): 品牌词 iweb → OpenIWeb（仅措辞）。
 //
 // Original request (2026-09-06, Asia/Shanghai): 新增 ./openiweb 官网站点。
 // base-path 契约：SITE_BASE=/openiweb 时 kit.paths.base = "/openiweb"，站内链接

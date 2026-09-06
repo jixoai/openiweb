@@ -1,8 +1,10 @@
-# Orthogonal intents (2026-09-06): [official-site] iweb 官网部署——GitHub
+# Orthogonal intents (2026-09-06): [official-site] OpenIWeb 官网部署——GitHub
 # Pages（push main + 手动触发）；[base-path] DNS 就绪前以子路径
 # SITE_BASE=/openiweb 构建（jixoai.github.io/openiweb）；[cname-gate] 自定义域名
 # 由 Owner 管理，SITE_CNAME=1 时才写 CNAME 并以根路径服务。
 # Original request (2026-09-06, Asia/Shanghai): 新增 ./openiweb 官网站点。
+# [rename-openiweb] (2026-09-07, Owner): 品牌词 iweb → OpenIWeb（仅注释措辞，
+# 结构与构建环境不动）。
 #
 # 切换自定义域名（Owner 操作）：DNS 指向 jixoai.github.io 后，把构建环境
 # 改为 SITE_CNAME=1 + SITE_CNAME_DOMAIN=<域名>，同时移除 SITE_BASE（并按需

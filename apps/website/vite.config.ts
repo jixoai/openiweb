@@ -11,6 +11,8 @@
 // baseUrl 契约：SITE_URL > 按 SITE_BASE 推导（子路径模式 →
 // https://jixoai.github.io/openiweb；根路径模式 → https://jixoai.github.io，
 // 自定义域名切换时由 workflow 同时设 SITE_URL + 置空 SITE_BASE）。
+// [rename-openiweb] (2026-09-07, Owner): llms.txt 品牌 title/summary 随
+// 品牌词 iweb → OpenIWeb。
 import { sveltekit } from "@sveltejs/kit/vite";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "vite";
@@ -36,9 +38,9 @@ export default defineConfig({
 		llmsTxt({
 			distDir: "dist",
 			siteUrl,
-			title: "iweb",
+			title: "OpenIWeb",
 			summary:
-				"iweb is an open-source personal application node for people who don't want to learn containers, databases, or network operations: hand your MCP endpoint and one owner key to an AI coding agent, and it deploys and operates applications on your own node.",
+				"OpenIWeb is an open-source personal application node for people who don't want to learn containers, databases, or network operations: hand your MCP endpoint and one owner key to an AI coding agent, and it deploys and operates applications on your own node.",
 			// 根（en）为默认 locale；/zh/ 镜像独立成段（zh/llms.txt）。
 			locale: { segments: ["zh"], default: "en" },
 		}),

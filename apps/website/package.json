@@ -2,7 +2,7 @@
 	"name": "website",
 	"version": "0.0.0",
 	"private": true,
-	"description": "iweb 官方静态站点（jixoai 设计语言、GitHub Pages 交付）；零 runtime 依赖，全部为构建期工具链。",
+	"description": "OpenIWeb 官方静态站点（jixoai 设计语言、GitHub Pages 交付）；零 runtime 依赖，全部为构建期工具链。",
 	"type": "module",
 	"scripts": {
 		"dev": "vite dev --port 13222",

@@ -1,14 +1,15 @@
 <!-- 用户原始需求（2026-08-13）：面向普通人，由 AI 代理部署来源可能不可信的应用；每个应用必须隔离。 -->
 <!-- 正交意图：固定产品角色；固定应用不可信原则；固定节点控制面与应用沙箱边界。 -->
+<!-- 品牌改名（2026-09-07，Owner）：品牌词 iweb → OpenIWeb（标题与品牌句）；技术标识不动。 -->
 
-# iweb Product Context
+# OpenIWeb Product Context
 
-iweb gives a non-technical owner one personal node where an AI coding agent can deploy and operate applications without requiring the owner to understand containers, databases, or network operations.
+OpenIWeb gives a non-technical owner one personal node where an AI coding agent can deploy and operate applications without requiring the owner to understand containers, databases, or network operations.
 
 ## Language
 
 **Node owner**:
-The non-technical person who owns one iweb node and delegates application development and operation to an AI coding agent.
+The non-technical person who owns one OpenIWeb node and delegates application development and operation to an AI coding agent.
 _Avoid_: Operator, developer, tenant
 
 **Personal node**:

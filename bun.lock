@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "iweb",
+      "name": "openiweb",
       "devDependencies": {
         "@cloudflare/workers-types": "latest",
         "@types/node": "^24.0.0",

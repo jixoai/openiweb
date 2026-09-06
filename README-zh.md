@@ -1,12 +1,12 @@
 <div align="center">
 
-<img src="./apps/admin-console/src/lib/assets/favicon.svg" width="120" alt="iweb logo" />
+<img src="./apps/admin-console/src/lib/assets/favicon.svg" width="120" alt="OpenIWeb logo" />
 
-# iweb
+# OpenIWeb
 
 </div>
 
-**iweb** 是一个面向普通人的开源个人应用节点：你不需要理解容器、数据库或网络运维，
+**OpenIWeb** 是一个面向普通人的开源个人应用节点：你不需要理解容器、数据库或网络运维，
 把 MCP 端点和一把密钥交给 AI 编程代理（Codex、Claude Code……），应用就部署和运行在
 你自己的节点上；你用一个浏览器控制台和一把密钥管理一切。
 
@@ -28,7 +28,7 @@ iweb-kernel :8080           唯一发布端口（单个 Rust 静态二进制）
                   iweb-workspace / iweb-cells-<app> / iweb-apps / iweb-system
 ```
 
-一台 iweb 安装 = 一个 owner 的个人节点。除 Kernel 入口外的所有监听（RustFS、控制
+一台 OpenIWeb 安装 = 一个 owner 的个人节点。除 Kernel 入口外的所有监听（RustFS、控制
 API、每个 celld）都只在容器内回环，绝不发布。
 
 ## 技术选型
@@ -134,7 +134,7 @@ tests/                   bun 原生电池（含浏览器契约套件）
 
 ## 安全边界
 
-iweb 采用两层信任模型。**celld 是信任层**：舰队应用（admin、mcp、notes、hello、
+OpenIWeb 采用两层信任模型。**celld 是信任层**：舰队应用（admin、mcp、notes、hello、
 search、collab）只能经你构建的节点镜像进入，每应用一个独立进程，由用户态资源
 看门狗约束（软限 SIGKILL + 单应用退避重启）；不存在 celld 运行时准入，celld 也
 从不承诺对抗性多租户边界。**wasm 是不可信层、也是唯一的运行时准入路径**：任意

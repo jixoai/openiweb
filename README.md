@@ -1,12 +1,12 @@
 <div align="center">
 
-<img src="./apps/admin-console/src/lib/assets/favicon.svg" width="120" alt="iweb logo" />
+<img src="./apps/admin-console/src/lib/assets/favicon.svg" width="120" alt="OpenIWeb logo" />
 
-# iweb
+# OpenIWeb
 
 </div>
 
-**iweb** is an open-source personal application node for people who don't want
+**OpenIWeb** is an open-source personal application node for people who don't want
 to learn containers, databases, or network operations. An AI coding agent
 (Codex, Claude Code, …) deploys and operates applications on the node through
 MCP; the owner manages everything from a browser console with a single key.
@@ -30,7 +30,7 @@ iweb-kernel :8080           the only published port (a single Rust binary)
           iweb-workspace / iweb-cells-<app> / iweb-apps / iweb-system
 ```
 
-One iweb installation is one owner's personal node. Everything except the
+One OpenIWeb installation is one owner's personal node. Everything except the
 Kernel ingress — RustFS, the control API, every celld listener — stays on
 container-internal loopback and is never published.
 
@@ -156,7 +156,7 @@ tests/                   bun-native batteries incl. browser-contract suites
 
 ## Security boundary
 
-iweb runs a two-tier trust model. **celld is the trusted tier**: fleet
+OpenIWeb runs a two-tier trust model. **celld is the trusted tier**: fleet
 applications (admin, mcp, notes, hello, search, collab) enter the node only
 through node images you build, run one process per app, and are bounded by a
 userspace resource watchdog (soft-limit SIGKILL plus per-app restart). There

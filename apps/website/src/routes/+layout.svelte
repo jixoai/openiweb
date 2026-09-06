@@ -12,6 +12,8 @@
   [locale-persist] 持久化已内置于 registry language-switcher
   （consumer-feedback-fixes P0-2，2026-09-06 upgrade 消费）：组件点击
   自写 localStorage lang——app.html 首帧协商读它为最高优先级。
+  [rename-openiweb] (2026-09-07, Owner): 品牌词 iweb → OpenIWeb
+  （header 品牌块、footer 幽灵字标与 © 行），技术标识不动。
 
   Original request (2026-09-06, Asia/Shanghai): 新增 ./openiweb 官网站点。
 -->
@@ -82,7 +84,7 @@
 <WebsiteScaffold>
   {#snippet header()}
     <TerminalHeader
-      brand="iweb"
+      brand="OpenIWeb"
       domain={SITE_DOMAIN}
       subtitle={copy.headerSubtitle}
       homeHref={localeHref(locale)}
@@ -169,7 +171,7 @@
   {@render children()}
 
   {#snippet footer()}
-    <TerminalFooter ghost="IWEB" copyright={`© ${new Date().getFullYear()} iweb contributors`}>
+    <TerminalFooter ghost="OPENIWEB" copyright={`© ${new Date().getFullYear()} OpenIWeb contributors`}>
       <TerminalFooterColumn title={copy.footer.projectTitle}>
         <a href={GITHUB_URL} target="_blank" rel="noreferrer">GitHub</a>
         <a href={copy.footer.docsUrl} target="_blank" rel="noreferrer">{copy.footer.docsLabel}</a>

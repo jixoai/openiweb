@@ -4,9 +4,11 @@
 # 升级说明 + 与上一版的 compare 链接）。不涉及 npm 发布（本仓库无私有 npm 包）。
 # Original request (2026-09-06, Asia/Shanghai): 把没有好好配置 github-releases
 # 的仓库 CI/CD 升级为实现自动发布，让 jixoai.com 能显示版本号。
+# [rename-openiweb] (2026-09-07, Owner): 品牌词 iweb → OpenIWeb（注释、notes
+# 模板与 Release 标题；iweb-data 卷名等技术标识不动）。
 #
 # 与 deploy-website.yml 正交：本流程只产出 Release（tag + notes），不构建镜像
-# （iweb 以源码构建镜像分发，无 registry 镜像），也不触碰站点部署。
+# （OpenIWeb 以源码构建镜像分发，无 registry 镜像），也不触碰站点部署。
 
 name: Release
 
@@ -91,7 +93,7 @@ jobs:
             echo
             echo "## Docker image"
             echo
-            echo "iweb ships as a source-built container image — no registry image is published for this release. Build from the tag:"
+            echo "OpenIWeb ships as a source-built container image — no registry image is published for this release. Build from the tag:"
             echo
             echo '```bash'
             echo "git clone $SERVER_URL/$REPOSITORY.git && cd ${REPOSITORY#*/}"
@@ -115,4 +117,4 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.tag.outputs.tag }}
-        run: gh release create "$TAG" --verify-tag --title "iweb $TAG" --notes-file release-notes.md
+        run: gh release create "$TAG" --verify-tag --title "OpenIWeb $TAG" --notes-file release-notes.md

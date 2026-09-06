@@ -1,10 +1,12 @@
 <!-- Orthogonal intents (2026-09-06): [official-site] apps/website 使用说明；
 [base-path] 两种服务形态的构建开关；[registry] registry 消费与升级入口。
-Original request (2026-09-06, Asia/Shanghai): 新增 ./openiweb 官网站点。 -->
+Original request (2026-09-06, Asia/Shanghai): 新增 ./openiweb 官网站点。
+[rename-openiweb] (2026-09-07, Owner): 品牌词 iweb → OpenIWeb；随 brand 修正
+两处遗留事实（/iweb/… 前缀应为 /openiweb/…、CNAME 兜底域名 openiweb.jixoai.com）。 -->
 
-# iweb website（`apps/website`）
+# OpenIWeb website（`apps/website`）
 
-iweb 的官方静态站点：SvelteKit 2 + adapter-static + Tailwind v4（CSS-first），
+OpenIWeb 的官方静态站点：SvelteKit 2 + adapter-static + Tailwind v4（CSS-first），
 视觉身份整体来自 [ui.jixoai.com](https://ui.jixoai.com) registry（jixoai
 design language，`--brand-hue: 253`，源自 logo 蓝 `#0b81fd`）。零 runtime
 依赖；`dependencies` 为空，全部工具链在 `devDependencies`。
@@ -23,8 +25,8 @@ bun run preview                  # vite 预览
 
 | 形态 | 构建环境 | 产物 | 说明 |
 | --- | --- | --- | --- |
-| 项目页子路径 | `SITE_BASE=/openiweb`（默认 workflow 形态） | 链接全部落在 `/iweb/…`，无 CNAME | DNS 就绪前的起步形态：`https://jixoai.github.io/openiweb` |
-| 自定义域名 | `SITE_CNAME=1`（+ `SITE_CNAME_DOMAIN=<域名>`，默认 `iweb.jixoai.com`；`SITE_BASE` 留空，按需 `SITE_URL=https://<域名>`） | 写 `dist/CNAME`，根路径服务 | Owner 配好 DNS 后在 workflow 里改环境即可，无代码变更 |
+| 项目页子路径 | `SITE_BASE=/openiweb`（默认 workflow 形态） | 链接全部落在 `/openiweb/…`，无 CNAME | DNS 就绪前的起步形态：`https://jixoai.github.io/openiweb` |
+| 自定义域名 | `SITE_CNAME=1`（+ `SITE_CNAME_DOMAIN=<域名>`，默认 `openiweb.jixoai.com`；`SITE_BASE` 留空，按需 `SITE_URL=https://<域名>`） | 写 `dist/CNAME`，根路径服务 | Owner 配好 DNS 后在 workflow 里改环境即可，无代码变更 |
 
 - `SITE_BASE` 由 `svelte.config.js` 读入 `kit.paths.base`；站内链接一律经
   `$app/paths` 的 `base` 解析（`src/routes/+layout.svelte`），严禁硬编码前缀。

@@ -1,5 +1,5 @@
 /* -------------------------------------------------------------------------
- * Orthogonal intents (2026-09-06): [official-site] iweb 官网样式入口；
+ * Orthogonal intents (2026-09-06): [official-site] OpenIWeb 官网样式入口；
  * [design-language] 视觉身份整体来自 @jixoai registry 的 jixoai-theme
  * token 表（OKLCH 单色相法则、暗色 -4° 漂移、硬偏移阴影、radius/bevel
  * 法则、mono 优先字体、终端表面、滚动驱动 reveal），由
@@ -10,6 +10,7 @@
  * readonly 代码面、箭头列表）。
  *
  * Original request (2026-09-06, Asia/Shanghai): 新增 ./openiweb 官网站点。
+ * [rename-openiweb] (2026-09-07, Owner): 品牌词 iweb → OpenIWeb（仅措辞）。
  * [mobile-polish]（2026-09-06 mobile-audit，P2）：对锁定 registry chrome
  * （terminal-header / hero-section —— 文件按 jixoai-ui.lock 保持字节不变）
  * 的呈现层 seam 覆盖，挂在组件自带的稳定钩子上；规则刻意 unlayered，

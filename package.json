@@ -1,5 +1,5 @@
 {
-  "name": "iweb",
+  "name": "openiweb",
   "private": true,
   "workspaces": [
     "apps/admin-console",

@@ -9,6 +9,9 @@
 // Original request (2026-09-06, Asia/Shanghai): 所有站点需要至少提供中英
 // 两种语言的支持；/ 保持英文（URL 稳定），/zh/ 为中文镜像。文案升级
 // （2026-09-06，同变更）：hero 定位与特性叙事按上述法则重写。
+// [rename-openiweb] (2026-09-07, Owner): 品牌词 iweb → OpenIWeb（en/zh 同
+// 形）；技术标识（iweb-kernel、iweb-wasmd、iweb-* 桶、IWEB_* 环境变量、
+// _iweb/health、iwb_*、mcpServers 的 "iweb" 配置键）是产品接口面，不动。
 import { GITHUB_URL, README_URL, README_ZH_URL, SPECS_URL } from "./site";
 
 export type LocaleCode = "en" | "zh";
@@ -122,9 +125,9 @@ const en: SiteCopy = {
   headerSubtitle: "personal application node",
   switcherAria: "Language",
   meta: {
-    title: "iweb — a personal application node",
+    title: "OpenIWeb — a personal application node",
     description:
-      "iweb is an open-source personal application node for people who don't want to learn containers, databases, or network operations: hand an MCP endpoint and one revocable owner key to your AI coding agent (Codex, Claude Code, …) and keep the browser console. Single-port Rust kernel, two-tier trust runtime, ≤ 240 MB idle.",
+      "OpenIWeb is an open-source personal application node for people who don't want to learn containers, databases, or network operations: hand an MCP endpoint and one revocable owner key to your AI coding agent (Codex, Claude Code, …) and keep the browser console. Single-port Rust kernel, two-tier trust runtime, ≤ 240 MB idle.",
   },
   nav: {
     landmark: "Primary",
@@ -135,7 +138,7 @@ const en: SiteCopy = {
     language: "Language",
   },
   hero: {
-    eyebrow: "iweb · open source · a personal node for non-operators",
+    eyebrow: "OpenIWeb · open source · a personal node for non-operators",
     titleLead: "A personal application node.",
     titleEm: "Operated by your AI agent.",
     summary:
@@ -315,9 +318,9 @@ const zh: SiteCopy = {
   headerSubtitle: "个人应用节点",
   switcherAria: "语言",
   meta: {
-    title: "iweb — 个人应用节点",
+    title: "OpenIWeb — 个人应用节点",
     description:
-      "iweb 是面向普通人的开源个人应用节点：把 MCP 端点和一把可吊销的 owner 密钥交给 AI 编程代理（Codex、Claude Code……），应用部署和运行在你自己的节点上；你用浏览器控制台和一把密钥管理一切。单端口 Rust 内核、两层信任运行时、闲时内存 ≤ 240 MB。",
+      "OpenIWeb 是面向普通人的开源个人应用节点：把 MCP 端点和一把可吊销的 owner 密钥交给 AI 编程代理（Codex、Claude Code……），应用部署和运行在你自己的节点上；你用浏览器控制台和一把密钥管理一切。单端口 Rust 内核、两层信任运行时、闲时内存 ≤ 240 MB。",
   },
   nav: {
     landmark: "主导航",
@@ -328,7 +331,7 @@ const zh: SiteCopy = {
     language: "语言",
   },
   hero: {
-    eyebrow: "iweb · 开源 · 面向普通人的个人节点",
+    eyebrow: "OpenIWeb · 开源 · 面向普通人的个人节点",
     titleLead: "个人应用节点。",
     titleEm: "由你的 AI 代理运维。",
     summary:
@@ -391,7 +394,7 @@ const zh: SiteCopy = {
     eyebrow: "入口",
     title: "一个发布端口路由整个节点",
     summary:
-      "iweb-kernel :8080 是唯一发布端口（单个 Rust 二进制）。除 Kernel 入口外的所有监听——RustFS、控制 API、每个 celld——都只在容器内回环，绝不发布。一台 iweb 安装 = 一个 owner 的个人节点。",
+      "iweb-kernel :8080 是唯一发布端口（单个 Rust 二进制）。除 Kernel 入口外的所有监听——RustFS、控制 API、每个 celld——都只在容器内回环，绝不发布。一台 OpenIWeb 安装 = 一个 owner 的个人节点。",
     routeCol: "路由",
     servesCol: "承载",
     rows: [

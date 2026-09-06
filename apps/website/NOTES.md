@@ -1,6 +1,10 @@
-# iweb website 实施记录（NOTES）
+# OpenIWeb website 实施记录（NOTES）
 
-`apps/website`（包名 `website`）——iweb 官方静态站点，2026-09-06 从零建立。
+<!-- 品牌改名（2026-09-07，Owner）：品牌词 iweb → OpenIWeb（标题、品牌句与
+构建形态一节的当前事实——/openiweb 前缀与 openiweb.jixoai.com 兜底域名；
+带日期的历史流水记录不改写）。 -->
+
+`apps/website`（包名 `website`）——OpenIWeb 官方静态站点，2026-09-06 从零建立。
 结构先例：unipty `packages/www`；视觉信源：jixoai-website skill +
 ui.jixoai.com registry（jixoai-ui 0.3.0）。
 
@@ -112,21 +116,21 @@ initial`（封杀 Tailwind 默认 rounded 刻度）外全部由 registry 表自�
 ## 构建与服务形态
 
 - `SITE_BASE=/openiweb` → `kit.paths.base`（`paths.relative: false`，绝对资源
-  URL 带 `/iweb` 前缀）；站内链接经 `$app/paths` 的 `base`。
+  URL 带 `/openiweb` 前缀）；站内链接经 `$app/paths` 的 `base`。
 - `scripts/postbuild.mjs`：`SITE_CNAME=1`（域名取 `SITE_CNAME_DOMAIN`，
-  默认 `iweb.jixoai.com`——Owner 未定 DNS 前的占位约定，切换时改环境即可）
+  默认 `openiweb.jixoai.com`——Owner 未定 DNS 前的占位约定，切换时改环境即可）
   写 `dist/CNAME`；其余构建零写入。
 - `scripts/check-static.mjs`：产物存在性、绝对 URL base 前缀、本地链接
   落盘可解析、llms 导出三件套 + 绝对链接、CNAME 门控。
-- 本地抽查法：`dist` 符号链接为 `iweb` 后 `python3 -m http.server` 起根目录，
-  `/iweb/`、`/iweb/favicon.svg`、`/iweb/llms.txt`、`/iweb/index.md`、
-  `/iweb/_app/...`（js/css/woff2）全部 200。
+- 本地抽查法：`dist` 符号链接为 `openiweb` 后 `python3 -m http.server` 起根目录，
+  `/openiweb/`、`/openiweb/favicon.svg`、`/openiweb/llms.txt`、`/openiweb/index.md`、
+  `/openiweb/_app/...`（js/css/woff2）全部 200。
 
 ## 内容信源
 
 全部文案取自仓库 `README.md` / `README-zh.md`（定位、技术选型、入口矩阵、
 演示应用、快速开始、MCP 接入、两层信任、当前限制）；未虚构任何能力；
-许可证信息仓库未声明，站点不做许可声明（footer 仅 `© iweb contributors`）。
+许可证信息仓库未声明，站点不做许可声明（footer 仅 `© OpenIWeb contributors`）。
 
 ## 文案升级：受众优先叙事（2026-09-06，release-automation-and-copy）
 
