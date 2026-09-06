@@ -34,11 +34,11 @@ jobs:
       # 本地 bun install 后同 commit 提交锁文件，保持 --frozen-lockfile 可用。
       - name: Install workspace toolchain
         run: bun install --frozen-lockfile
-      - name: Build the static site (project-pages subpath mode)
-        run: SITE_BASE=/openiweb bun run build
+      - name: Build the static site (custom-domain mode)
+        run: SITE_CNAME=1 SITE_CNAME_DOMAIN=openiweb.jixoai.com SITE_URL=https://openiweb.jixoai.com bun run build
         working-directory: apps/website
       - name: Run the static checks
-        run: SITE_BASE=/openiweb bun run check
+        run: SITE_CNAME=1 SITE_CNAME_DOMAIN=openiweb.jixoai.com SITE_URL=https://openiweb.jixoai.com bun run check
         working-directory: apps/website
 
       - uses: actions/upload-pages-artifact@v3
