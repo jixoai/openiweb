@@ -127,3 +127,38 @@ initial`（封杀 Tailwind 默认 rounded 刻度）外全部由 registry 表自�
 全部文案取自仓库 `README.md` / `README-zh.md`（定位、技术选型、入口矩阵、
 演示应用、快速开始、MCP 接入、两层信任、当前限制）；未虚构任何能力；
 许可证信息仓库未声明，站点不做许可声明（footer 仅 `© iweb contributors`）。
+
+## 文案升级：受众优先叙事（2026-09-06，release-automation-and-copy）
+
+- **叙事法则**（spec：Purpose-led bilingual copy）：hero 先说受众与痛点
+  （想要自托管应用但不想学容器/数据库/网络运维），再说交接（一个 MCP 端点
+  + 一把可吊销 owner 密钥交给 AI 代理），再给"凭什么信"（两层信任运行时 +
+  单端口 Rust 内核），证据以数字与可点击的演示应用收尾。每张特性卡的第一
+  句都是动机句（spec 场景硬性要求），第二句起才是事实清单。
+- **改动面**：`site-i18n.ts` 的 meta.description、hero（eyebrow/summary/
+  badges）、6 张特性卡 body、demos 标题+summary；en/zh 同步重写，
+  `SiteCopy` 同构不变（类型形状 + 运行时形状双重验证，仅 `honesty.buttons`
+  数量 en=4/zh=3 是既有的互链镜像设计，非本次引入）。quick-start、MCP、
+  安全边界按 spec 保持事实形态不动。
+- **信源升级**：i18n 文件头注释原"en 逐字取自原英文首页（不改一字）"法则
+  随本次重写作废，改为"事实可溯源 README/specs + 叙事法则"；文件头注释已
+  同步改写，避免遗留失效法律。
+- **验证**：CNAME 模式（SITE_CNAME=1 + openiweb.jixoai.com）与子路径模式
+  （SITE_BASE=/openiweb）双构建 + check-static 全绿；根 `bun run check`
+  （tsc -b + admin-console svelte-check）0 错 0 警；产物 HTML 双 locale
+  抽查确认新文案落盘。
+
+## Release 自动化（L1，仓库级，2026-09-06）
+
+- 新增 `.github/workflows/release.yml`：workflow_dispatch(version 输入，
+  补 v 前缀 + `vX.Y.Z` 门禁) 或 tag push `v*` → 推 tag（dispatch 路径，
+  已存在则复用）→ 生成 notes（本版要点占位 / Docker 镜像引用：本仓库无
+  registry 镜像，为源码构建说明 / 升级说明 + compare 链接）→
+  `gh release create --verify-tag`。actionlint 干净；与 deploy-website.yml
+  完全正交，不触碰站点部署。
+- 首个 Release **v0.1.0** 已创建并验证（tag → main e520bc7，
+  draft/prerelease 均 false）：https://github.com/jixoai/openiweb/releases/tag/v0.1.0
+  ——notes 从 README 提炼当前产品状态（单端口 Rust 内核、MCP 运维、两层
+  信任、RustFS、可吊销 owner keys、静态控制台、三个演示应用、≤240MB、
+  当前限制）。本地创建命令带 `env -u *_proxy`（宿主代理会劫持 gh API）。
+  jixoai.com 版本号胶囊将在其下次构建时从 releases 解析出 v0.1.0。

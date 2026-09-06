@@ -1,0 +1,118 @@
+# Orthogonal intents (2026-09-06): [release-l1] GitHub Releases 自动化（L1）
+# ——workflow_dispatch(version 输入) 或 tag push v* → 归一化 tag（补 v 前缀、
+# vX.Y.Z 门禁）→ 创建 GitHub Release（notes 模板：本版要点 / Docker 镜像引用 /
+# 升级说明 + 与上一版的 compare 链接）。不涉及 npm 发布（本仓库无私有 npm 包）。
+# Original request (2026-09-06, Asia/Shanghai): 把没有好好配置 github-releases
+# 的仓库 CI/CD 升级为实现自动发布，让 jixoai.com 能显示版本号。
+#
+# 与 deploy-website.yml 正交：本流程只产出 Release（tag + notes），不构建镜像
+# （iweb 以源码构建镜像分发，无 registry 镜像），也不触碰站点部署。
+
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version, e.g. v0.1.0 (leading v added when missing)"
+        required: true
+        default: "v0.1.0"
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # dispatch 路径需要在触发分支 HEAD 打 tag；tag push 路径直接检出 tag。
+          fetch-depth: 0
+
+      - name: Resolve the release tag
+        id: tag
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+          REF_TYPE: ${{ github.ref_type }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          if [ "$REF_TYPE" = "tag" ]; then
+            tag="$REF_NAME"
+          else
+            tag="${INPUT_VERSION//[[:space:]]/}"
+            case "$tag" in v*) ;; *) tag="v$tag" ;; esac
+          fi
+          if ! printf '%s' "$tag" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$'; then
+            echo "::error::refusing to release: '$tag' is not a vX.Y.Z tag"
+            exit 1
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+      - name: Push the tag (dispatch path; no-op when it already exists)
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          TAG: ${{ steps.tag.outputs.tag }}
+        run: |
+          set -euo pipefail
+          if git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then
+            echo "tag $TAG already exists remotely — releasing at it"
+            exit 0
+          fi
+          git config user.name "${GITHUB_ACTOR}"
+          git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+          git tag "$TAG" HEAD
+          git push origin "refs/tags/$TAG"
+
+      - name: Compose the release notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.tag.outputs.tag }}
+          REPOSITORY: ${{ github.repository }}
+          SERVER_URL: ${{ github.server_url }}
+        run: |
+          set -euo pipefail
+          prev="$(gh api "repos/$REPOSITORY/releases/latest" --jq .tag_name 2>/dev/null || true)"
+          compare=""
+          if [ -n "$prev" ] && [ "$prev" != "$TAG" ]; then
+            compare="- [Commits $prev → $TAG]($SERVER_URL/$REPOSITORY/compare/$prev...$TAG)"
+          fi
+          {
+            echo "## What's in this release"
+            echo
+            echo "<!-- Summarize the highlights of $TAG here (edit the published release if needed). -->"
+            echo
+            echo "## Docker image"
+            echo
+            echo "iweb ships as a source-built container image — no registry image is published for this release. Build from the tag:"
+            echo
+            echo '```bash'
+            echo "git clone $SERVER_URL/$REPOSITORY.git && cd ${REPOSITORY#*/}"
+            echo "git checkout $TAG"
+            echo 'cp .env.example .env   # set CELLD_NODE, IWEB_BASE_HOST, a long random IWEB_API_TOKEN, and the S3 secrets'
+            echo 'docker compose up -d --build'
+            echo '```'
+            echo
+            echo "Multi-arch: \`Dockerfile\` (arm64) and \`Dockerfile.amd64\` (x86_64, builder knobs \`CARGO_BUILD_JOBS\` and \`CRATES_MIRROR=rsproxy\` for constrained hosts)."
+            echo
+            echo "## Upgrading"
+            echo
+            echo "- Rebuild the image from the new tag and recreate the container (\`docker compose up -d --build\`). Node data lives in the \`iweb-data\` volume and RustFS buckets; configuration lives in \`.env\` — no migration step is required unless stated above."
+            echo '- Owner keys are issued by the Kernel/console and can be revoked from the console; secrets are never stored in the workspace (README § Owner keys & audit).'
+            if [ -n "$compare" ]; then
+              echo "- $compare"
+            fi
+          } > release-notes.md
+
+      - name: Create the GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.tag.outputs.tag }}
+        run: gh release create "$TAG" --verify-tag --title "iweb $TAG" --notes-file release-notes.md
