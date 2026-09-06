@@ -162,3 +162,26 @@ initial`（封杀 Tailwind 默认 rounded 刻度）外全部由 registry 表自�
   信任、RustFS、可吊销 owner keys、静态控制台、三个演示应用、≤240MB、
   当前限制）。本地创建命令带 `env -u *_proxy`（宿主代理会劫持 gh API）。
   jixoai.com 版本号胶囊将在其下次构建时从 releases 解析出 v0.1.0。
+
+## 语言协商（2026-09-06 locale-negotiation 变更）
+
+- `src/app.html` 首帧前内联协商：zh 偏好访问者落在默认（en）面时，同路径同
+  hash 一次性 `location.replace` 到 `/zh/` 镜像（不留历史）。优先级：显式
+  选择（localStorage `lang`）> navigator.languages 逐项取主子标签的首个命中
+  （zh-CN/zh-Hans → zh；en-US 命中即留——`['en-US','zh-CN']` 不跳，首个
+  命中即定）。
+- **法则：检测只在默认语言面发生，非默认面永不跳转。** 结构性防环：脚本只
+  从默认面跳走、目标必带 `/zh/` 前缀（条件不再成立）、绝无从 `/zh/` 跳回。
+  爬虫/无 JS 拿到静态默认面（hreflang 三件套已声明 alternates）。
+- base 感知靠烘焙：`hooks.server.ts` 与 svelte.config.js 的 `resolveBase`
+  同律解析 SITE_BASE（CNAME 模式即 SITE_BASE 缺省 → 根路径），锚定引号替换
+  进协商脚本；双模式 dist 实测烘焙值为 `""` 与 `"/openiweb"`。
+- 切换器持久化在根布局以委托 click 挂在 bezel 包裹层（读被点锚点的
+  `hreflang`）——registry `language-switcher` 件与其 lock 逐字节不变；显式
+  点击此后永远压过检测。
+- 验证（playwright-core 1.63 + 本机缓存 Chromium）：三站矩阵 × 双服务模式，
+  zh-CN → `/zh/`（hash 保留）、zh-Hans-CN 主子标签命中、en-US 留、en-US
+  优先列表留、pt-BR 优先列表走到 `/zh/`、stored zh 生效、stored en 在
+  `/zh/` 不跳回、zh-CN 在 `/zh/` 不动（防环律）——每模式 16 例 + 真点击
+  切换持久化全绿；双模式 build + check-static PASS；dev 抽查（opentray，
+  同款 hook 管线）确认 dev 下占位符同样解析。
