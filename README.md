@@ -57,6 +57,12 @@ docker compose up -d --build
 curl -H "Host: $IWEB_BASE_HOST" http://127.0.0.1:9010/_iweb/health
 ```
 
+Prebuilt images are also published to
+[`ghcr.io/jixoai/openiweb`](https://github.com/jixoai/openiweb/pkgs/container/openiweb)
+(multi-arch, built by CI on every release) if you prefer `docker run` or
+`compose pull` over building locally — set `IWEB_IMAGE`, default in
+`.env.example`.
+
 `IWEB_BASE_HOST` is a hostname suffix only (no scheme/port/path). The
 container publishes one port (8080 → map it however you like). TLS is
 terminated in front of the node (1Panel, Caddy, nginx, …); the kernel routes

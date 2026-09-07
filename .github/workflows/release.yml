@@ -107,7 +107,7 @@ jobs:
             echo
             echo "## Upgrading"
             echo
-            echo "- Rebuild the image from the new tag and recreate the container (\`docker compose up -d --build\`). Node data lives in the \`iweb-data\` volume and RustFS buckets; configuration lives in \`.env\` — no migration step is required unless stated above."
+            echo "- Update to the prebuilt image (\`ghcr.io/jixoai/openiweb:<version>\` is published by the docker workflow on every release) or rebuild from the new tag (\`docker compose up -d --build\`). Node data lives in the \`iweb-data\` volume and RustFS buckets; configuration lives in \`.env\` — no migration step is required unless stated above."
             echo '- Owner keys are issued by the Kernel/console and can be revoked from the console; secrets are never stored in the workspace (README § Owner keys & audit).'
             if [ -n "$compare" ]; then
               echo "- $compare"
