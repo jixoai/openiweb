@@ -99,6 +99,7 @@ jobs:
             echo "git clone $SERVER_URL/$REPOSITORY.git && cd ${REPOSITORY#*/}"
             echo "git checkout $TAG"
             echo 'cp .env.example .env   # set CELLD_NODE, IWEB_BASE_HOST, a long random IWEB_API_TOKEN, and the S3 secrets'
+            echo '# 预构建镜像（推荐）：docker run / compose 直接拉取 ghcr.io/jixoai/openiweb'
             echo 'docker compose up -d --build'
             echo '```'
             echo
