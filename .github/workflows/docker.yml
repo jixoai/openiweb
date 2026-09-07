@@ -1,0 +1,109 @@
+name: docker
+
+# Prebuilt ghcr images for OpenIWeb (Owner directive 2026-09-07, modeled
+# on opendweb's docker.yml). The self-build flow (Dockerfile + compose)
+# stays; this publishes ready-made images to ghcr.io/jixoai/openiweb so
+# `docker run` / `docker compose pull` work without a local toolchain.
+#
+# Arch split is forced by the Dockerfiles themselves: base-image digests
+# are pinned PER-TARGET-ARCH (podman/buildkit do not resolve multi-arch
+# digest pins to the host arch), so amd64 builds from Dockerfile.amd64
+# and arm64 from Dockerfile. Both jobs run on native runners (no QEMU:
+# the two Rust trees — kernel + wasmtime — make emulated builds
+# impractical), push by digest, and a merge job stitches the multi-arch
+# index with the same tag scheme as opendweb (branch / semver /
+# latest-on-default).
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { platform: linux/amd64, os: ubuntu-latest, dockerfile: Dockerfile.amd64 }
+          - { platform: linux/arm64, os: ubuntu-24.04-arm, dockerfile: Dockerfile }
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      digest_amd64: ${{ steps.out.outputs.amd64 }}
+      digest_arm64: ${{ steps.out.outputs.armd64 }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # digest-addressed push: no per-arch tag ever surfaces; the merge
+      # job assembles the public tags from the two digests
+      - uses: docker/build-push-action@v6
+        id: build
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          platforms: ${{ matrix.platform }}
+          outputs: type=image,name=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }},push-by-digest=true,name-canonical=true,push=true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Export digest
+        id: out
+        run: |
+          case "${{ matrix.platform }}" in
+            linux/amd64) echo "amd64=${{ steps.build.outputs.digest }}" >> "$GITHUB_OUTPUT" ;;
+            linux/arm64) echo "armd64=${{ steps.build.outputs.digest }}" >> "$GITHUB_OUTPUT" ;;
+          esac
+
+  merge:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/metadata-action@v5
+        id: meta
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Create the multi-arch index
+        run: |
+          set -euo pipefail
+          IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
+          args=()
+          for tag in $(echo "${{ steps.meta.outputs.tags }}" | tr '\n' ' '); do
+            args+=( -t "$tag" )
+          done
+          docker buildx imagetools create \
+            "${args[@]}" \
+            "$IMAGE@${{ needs.build.outputs.digest_amd64 }}" \
+            "$IMAGE@${{ needs.build.outputs.digest_arm64 }}"
+          docker buildx imagetools inspect "$IMAGE:latest" || \
+            docker buildx imagetools inspect "$(echo '${{ steps.meta.outputs.tags }}' | head -n1)"
